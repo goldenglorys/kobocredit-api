@@ -1,0 +1,36 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+django = "*"
+django-cors-headers = "*"
+gunicorn = "*"
+django-heroku = "*"
+cloudinary = "*"
+django-extensions = "*"
+python-decouple = "*"
+psycopg2 = "*"
+djoser = "==1.7.0"
+pillow = "*"
+sentry-sdk = "==0.8.0"
+flake8 = "*"
+pypng = "*"
+qrcode = "*"
+requests = "*"
+coreapi = "*"
+drf-yasg = "*"
+django-seed = "*"
+django-filter = "*"
+autopep8 = "*"
+djangorestframework = "==3.8.0"
+drf-flex-fields = "*"
+djangorestframework-csv = "*"
+dj-database-url = "*"
+environs = "*"
+
+[requires]
+python_version = "3.6"
