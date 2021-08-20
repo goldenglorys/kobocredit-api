@@ -155,8 +155,11 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 # Did this cos BASE_DIR was being set to product_base/config/ instead
 # of product_base/
-STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
+
+# STATIC_ROOT = '/home/glory/kobolender/api/static/'
+# STATIC_URL = '/static/'
 
 # cloudinary.config(
 #     cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
