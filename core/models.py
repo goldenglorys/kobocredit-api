@@ -317,7 +317,7 @@ class Society(models.Model):
                 recordings__society=self,
                 recordings__action='debit',
                 recordings__member__is_active=True)), 0)
-        ).order_by('-credit').values('first_name', 'last_name', 'credit', 'debit')[:5]
+        ).order_by('-credit').values('id', 'first_name', 'last_name', 'credit', 'debit')[:5]
         # only include active members
         top_members = self.members.annotate(
             debit_amt=Coalesce(Sum('transactions__amount', filter=Q(
