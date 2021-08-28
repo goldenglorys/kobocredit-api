@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['.kobocredit.com', '178.128.246.93', 'localhost', '.herokuapp.com',]
+ALLOWED_HOSTS = ['.kobocredit.com', '178.128.246.93', 'localhost', '.herokuapp.com', '.netlify.app']
 
 
 # Application definition
