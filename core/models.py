@@ -26,8 +26,8 @@ class User(AbstractUser):
     picture = CloudinaryField('image', help_text='Profile picture', null=True)
     qrcode = JSONField(default=dict)
     status = CharField(max_length=15, default='registered')
-    bm_approval = BooleanField(max_length=15, default=True)
-    hq_approval = BooleanField(max_length=15, default=True)
+    bm_approval = BooleanField(max_length=15, default=False)
+    hq_approval = BooleanField(max_length=15, default=False)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
@@ -163,16 +163,22 @@ class Union(models.Model):
 
         # leaderboard
         top_secretaries = union_secretaries.annotate(
-            amount=Coalesce(Sum('recordings__amount', filter=Q(
+            credit=Coalesce(Sum('recordings__amount', filter=Q(
                 recordings__action='credit',
+                recordings__member__is_active=True)), 0),
+            debit=Coalesce(Sum('recordings__amount', filter=Q(
+                recordings__action='debit',
                 recordings__member__is_active=True)), 0)
-        ).order_by('-amount').values('first_name', 'last_name', 'amount')[:5]
+        ).order_by('-credit').values('first_name', 'last_name', 'credit', 'debit')[:5]
 
         top_societies = union_societies.annotate(
-            amount=Coalesce(Sum('transactions__amount', filter=Q(
+            credit=Coalesce(Sum('transactions__amount', filter=Q(
                 transactions__action='credit',
+                transactions__member__is_active=True)), 0),
+            debit=Coalesce(Sum('transactions__amount', filter=Q(
+                transactions__action='debit',
                 transactions__member__is_active=True)), 0)
-        ).order_by('-amount').values('name', 'amount')[:5]
+        ).order_by('-credit').values('name', 'credit', 'debit')[:5]
         # only include active members
         top_members = union_members.filter(is_active=True).annotate(
             debit_amt=Coalesce(Sum('transactions__amount', filter=Q(
@@ -180,7 +186,7 @@ class Union(models.Model):
             credit_amt=Coalesce(Sum('transactions__amount', filter=Q(
                 transactions__action='credit')), 0),
             amount=F('credit_amt')-F('debit_amt')
-        ).order_by('-amount').values('first_name', 'last_name', 'amount')[:5]
+        ).order_by('-amount').values('first_name', 'last_name', 'amount', 'credit_amt', 'debit_amt')[:5]
 
         return {
             'members_count': members_count,
@@ -302,12 +308,37 @@ class Society(models.Model):
             total_amt=F('credit_amt')-F('debit_amt')
         ).values('name', 'id', 'debit_amt', 'credit_amt', 'total_amt')
 
+        top_secretaries =  self.secretaries.annotate(
+            credit=Coalesce(Sum('recordings__amount', filter=Q(
+                recordings__society=self,
+                recordings__action='credit',
+                recordings__member__is_active=True)), 0),
+            debit=Coalesce(Sum('recordings__amount', filter=Q(
+                recordings__society=self,
+                recordings__action='debit',
+                recordings__member__is_active=True)), 0)
+        ).order_by('-credit').values('first_name', 'last_name', 'credit', 'debit')[:5]
+        # only include active members
+        top_members = self.members.annotate(
+            debit_amt=Coalesce(Sum('transactions__amount', filter=Q(
+                transactions__society=self,
+                transactions__action='debit')), 0),
+            credit_amt=Coalesce(Sum('transactions__amount', filter=Q(
+                transactions__society=self,
+                transactions__action='credit')), 0),
+            amount=F('credit_amt')-F('debit_amt')
+        ).order_by('-amount').values('first_name', 'last_name', 'amount', 'credit_amt', 'debit_amt')[:5]
+
         return {
             'total_credit': total_dict['credit'],
             'total_debit': total_dict['debit'],
             'members_count': members_count,
             'secretaries_count': secretaries_count,
-            'trans_summary': trans_summary
+            'trans_summary': trans_summary,
+            'leaderboard': {
+                'secretaries': top_secretaries,
+                'members': top_members
+            }
         }
 
     def __str__(self):
@@ -337,8 +368,8 @@ class Transaction(TimeStampedModel):
     account = models.ForeignKey(
         'Account', related_name='transactions', on_delete=models.CASCADE)
     status = CharField(max_length=15, default='created')
-    bm_approval = BooleanField(max_length=15, default=True)
-    hq_approval = BooleanField(max_length=15, default=True)
+    bm_approval = BooleanField(max_length=15, default=False)
+    hq_approval = BooleanField(max_length=15, default=False)
 
     def __str__(self):
         return f'{self.action} from {self.member}'

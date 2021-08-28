@@ -234,10 +234,10 @@ class TransactionSerializer(FlexFieldsModelSerializer):
 
     class Meta:
         model = Transaction
-        fields = ('member', 'secretary', 'society',
+        fields = ('id', 'member', 'secretary', 'society',
                   'amount', 'action', 'account', 'created','bm_approval', 'hq_approval',)
 
-    xpandable_fields = {
+    expandable_fields = {
         'member': (UserSerializer, {'source': 'member'}),
         'secretary': (UserSerializer, {'source': 'secretary'}),
         'society': (SocietySerializer, {'source': 'society'}),
